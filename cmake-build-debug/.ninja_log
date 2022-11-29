@@ -1,0 +1,5 @@
+# ninja log v5
+0	54	6914240537021668	CMakeFiles/main.dir/main.c.obj	53462b74808b2502
+5	86	6914240537343133	CMakeFiles/main.dir/library/intList.c.obj	e15ff9e7d6514ddc
+3	113	6914240537554056	CMakeFiles/main.dir/library/pointerList.c.obj	aa684237ab74c8e5
+113	202	6914240538478310	main.exe	831679fa03ff6a98
