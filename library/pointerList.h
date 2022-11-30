@@ -2,7 +2,7 @@
 #define LIST_POINTERLIST_H
 
 typedef struct {
-    void **elements;
+    void **pointers;
     int size;
     int capacity;
 } PointerList;
@@ -17,9 +17,13 @@ void expand_to_capacity(PointerList *pointerlist, int newCapacity);
 
 void shrink_to_capacity(PointerList *pointerlist, int newCapacity);
 
+void shrink_max_amount(PointerList *pointerList);
+
 int delete_pointerlist(PointerList *pointerlist);
 
-void add_pointer(PointerList *pointerlist, void * value);
+void add_pointer(PointerList *pointerlist, void * pointer);
+
+void set_pointer(PointerList *pointerList, int index, void *pointer);
 
 void add_all_pointers(PointerList *pointerlist, void * *values, int size);
 

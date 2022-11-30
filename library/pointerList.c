@@ -13,64 +13,86 @@ PointerList *initialize_pointerlist_of_capacity(int initialCapacity) {
     if (initialCapacity <= 0) {
         return NULL;
     }
-    PointerList *pointerlist = malloc(sizeof(PointerList));
+    PointerList *pointerlist = malloc(sizeof(PointerList) + 1);
     pointerlist->capacity = initialCapacity;
     pointerlist->size = 0;
-    pointerlist->elements = malloc(sizeof(void *) * pointerlist->capacity + 1);
+    pointerlist->pointers = malloc(sizeof(void *) * pointerlist->capacity + 1);
     for (int i = 0; i < pointerlist->capacity; i++) {
-        pointerlist->elements[i] = NULL;
+        pointerlist->pointers[i] = NULL;
     }
     return pointerlist;
 }
 
 PointerList *initialize_pointerlist_from_array(void **array, int size) {
-    PointerList *pointerlist = malloc(sizeof(PointerList));
+    PointerList *pointerlist = malloc(sizeof(PointerList) + 1);
     pointerlist->capacity = size < STANDARD_LIST_SIZE ? STANDARD_LIST_SIZE : size;
     pointerlist->size = size;
-    pointerlist->elements = malloc(sizeof(void *) * pointerlist->capacity + 1);
+    pointerlist->pointers = malloc(sizeof(void *) * pointerlist->capacity + 1);
     for (int i = 0; i < size; i++) {
-        pointerlist->elements[i] = array[i];
+        pointerlist->pointers[i] = array[i];
     }
     for (int i = size; i < STANDARD_LIST_SIZE; i++) {
-        pointerlist->elements[i] = 0;
+        pointerlist->pointers[i] = 0;
     }
     return pointerlist;
 }
 
 void expand_to_capacity(PointerList *pointerlist, int newCapacity) {
     void * *newElements = malloc(sizeof(void *) * newCapacity + 1);
-    copy_into(pointerlist->elements, newElements, pointerlist->capacity, newCapacity);
+    copy_into(pointerlist->pointers, newElements, pointerlist->capacity, newCapacity);
     for (int i = pointerlist->size; i < newCapacity; i++) {
         newElements[i] = 0;
     }
-    free(pointerlist->elements);
-    pointerlist->elements = newElements;
+    free(pointerlist->pointers);
+    pointerlist->pointers = newElements;
     pointerlist->capacity = newCapacity;
 }
 
 void shrink_to_capacity(PointerList *pointerlist, int newCapacity) {
     void * *newElements = malloc(sizeof(void *) * newCapacity + 1);
-    copy_into(pointerlist->elements, newElements, pointerlist->capacity, newCapacity);
-    free(pointerlist->elements);
-    pointerlist->elements = newElements;
+    copy_into(pointerlist->pointers, newElements, pointerlist->capacity, newCapacity);
+    free(pointerlist->pointers);
+    pointerlist->pointers = newElements;
     pointerlist->capacity = newCapacity;
+}
+
+void shrink_max_amount(PointerList *pointerList) {
+    int newCapacity = pointerList->capacity;
+
+    while (pointerList->size <= newCapacity / 4) {
+        newCapacity /= 2;
+    }
+
+    shrink_to_capacity(pointerList, newCapacity);
 }
 
 int delete_pointerlist(PointerList *pointerlist) {
     for (int i = 0; i < pointerlist->capacity; i++) {
-        free(pointerlist->elements[i]);
+        free(pointerlist->pointers[i]);
     }
-    free(pointerlist->elements);
+    free(pointerlist->pointers);
     free(pointerlist);
     return 0;
 }
 
-void add_pointer(PointerList *pointerlist, void * value) {
+void add_pointer(PointerList *pointerlist, void * pointer) {
     if (pointerlist->capacity == pointerlist->size) {
         expand_to_capacity(pointerlist, pointerlist->capacity * 2);
     }
-    pointerlist->elements[pointerlist->size] = value;
+    pointerlist->pointers[pointerlist->size] = pointer;
     pointerlist->size++;
+}
+
+void set_pointer(PointerList *pointerList, int index, void *pointer) {
+    if (pointerList->capacity <= index) {
+        expand_to_capacity(pointerList, index + 1);
+    }
+    if (index >= pointerList->size) {
+        pointerList->size = index + 1;
+    }
+    if (pointerList->pointers[index])
+        free(pointerList->pointers[index]);
+    pointerList->pointers[index] = pointer;
 }
 
 void add_all_pointers(PointerList *pointerlist, void **values, int size) {
@@ -90,7 +112,7 @@ void concat(PointerList *pointerlist1, PointerList *pointerlist2) {
         expand_to_capacity(pointerlist1, newSize);
     }
     for (int i = 0; i < pointerlist2->size; i++) {
-        add_pointer(pointerlist1, pointerlist2->elements[i]);
+        add_pointer(pointerlist1, pointerlist2->pointers[i]);
     }
 }
 
@@ -98,7 +120,7 @@ void * get_pointer(PointerList *pointerlist, int index) {
     if (index < 0 || index >= pointerlist->size) {
         return NULL;
     }
-    return pointerlist->elements[index];
+    return pointerlist->pointers[index];
 }
 
 void copy_into(void **array1, void **array2, int size1, int size2) {
@@ -110,14 +132,14 @@ void copy_into(void **array1, void **array2, int size1, int size2) {
 
 void print_pointers(PointerList *pointerlist) {
     for (int i = 0; i < pointerlist->size; i++) {
-        printf("%p ", pointerlist->elements[i]);
+        printf("%p ", pointerlist->pointers[i]);
     }
     printf("\n");
 }
 
 void print_pointers_in_capacity(PointerList *pointerlist) {
     for (int i = 0; i < pointerlist->capacity; i++) {
-        printf("%p ", pointerlist->elements[i]);
+        printf("%p ", pointerlist->pointers[i]);
     }
     printf("\n");
 }
@@ -126,12 +148,12 @@ void * remove_at(PointerList *pointerlist, int index) {
     if (index < 0 || index >= pointerlist->size) {
         return NULL;
     }
-    void * result = pointerlist->elements[index];
+    void * result = pointerlist->pointers[index];
     for (int i = index + 1; i < pointerlist->size; i++) {
-        pointerlist->elements[i - 1] = pointerlist->elements[i];
+        pointerlist->pointers[i - 1] = pointerlist->pointers[i];
     }
     pointerlist->size--;
-    pointerlist->elements[pointerlist->size] = 0;
+    pointerlist->pointers[pointerlist->size] = 0;
     if (pointerlist->size <= pointerlist->capacity / 4) {
         shrink_to_capacity(pointerlist, pointerlist->capacity / 2);
     }
@@ -140,7 +162,7 @@ void * remove_at(PointerList *pointerlist, int index) {
 
 int index_of(PointerList *pointerlist, void * value) {
     for (int i = 0; i < pointerlist->size; i++) {
-        if (pointerlist->elements[i] == value) {
+        if (pointerlist->pointers[i] == value) {
             return i;
         }
     }
@@ -154,17 +176,17 @@ int contains(PointerList *pointerlist, void * value) {
 //PointerList *indices_of(PointerList *pointerlist, void * value) {
 //    PointerList *result = initialize_pointerlist();
 //    for (int i = 0; i < pointerlist->size; i++) {
-//        if (pointerlist->elements[i] == value) {
+//        if (pointerlist->pointers[i] == value) {
 //            add_pointer(result, i);
 //        }
 //    }
 //    return result;
 //}
 
-//PointerList *values_at(PointerList *pointerlist, PointerList *indices) {
+//PointerList *int_values_at(PointerList *pointerlist, PointerList *indices) {
 //    PointerList *result = initialize_pointerlist_of_capacity(indices->size);
 //    for (int i = 0; i < indices->size; i++) {
-//        add_pointer(result, pointerlist->elements[indices->elements[i]]);
+//        add_pointer(result, pointerlist->pointers[indices->pointers[i]]);
 //    }
 //    return result;
 //}
