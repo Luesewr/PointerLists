@@ -45,7 +45,7 @@ int *get_int_array(PointerList *pointerList);
 
 void sort_ints(PointerList *pointerList);
 
-void sort_with_comparator(PointerList *pointerList, int (*comparator)(int, int));
+void sort_ints_with_comparator(PointerList *pointerList, int (*comparator)(int, int));
 
 void swap(int *a, int *b);
 

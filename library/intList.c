@@ -38,7 +38,7 @@ void print_ints(PointerList *pointerList) {
 
 void print_ints_in_capacity(PointerList *pointerList) {
     for (int i = 0; i < pointerList->capacity; i++) {
-        printf("%d ", pointerList->pointers[i]);
+        printf("%d ", get_int(pointerList, i));
     }
     printf("\n");
 }
@@ -251,6 +251,6 @@ void sort_ints(PointerList *pointerList) {
     dual_pivot_quick_sort_ints((int **)pointerList->pointers, 0, pointerList->size - 1, &default_comparator);
 }
 
-void sort_with_comparator(PointerList *pointerList, int (*comparator)(int, int)) {
+void sort_ints_with_comparator(PointerList *pointerList, int (*comparator)(int, int)) {
     dual_pivot_quick_sort_ints((int **)pointerList->pointers, 0, pointerList->size - 1, comparator);
 }
